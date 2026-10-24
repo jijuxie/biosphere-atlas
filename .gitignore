@@ -1,0 +1,7 @@
+# macOS 在外置硬盘上生成的元数据文件
+._*
+.DS_Store
+# 本地工具配置
+.claude/
+__pycache__/
+.vercel

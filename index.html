@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>万物 · 地球生命全景图鉴</title>
+<meta name="description" content="以地图、时间、演化、深度与尺度五种视角，重新认识地球上的生命。">
+<meta name="theme-color" content="#02040a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%235ef2ff' stroke-width='4'/%3E%3Cpath d='M14 34c8-14 28-14 36 0M18 22c6 6 22 6 28 0M20 46c6-6 18-6 24 0' fill='none' stroke='%23a17bff' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css?v=20261024101835">
+<script>
+/* 启动守护：脚本还没跑起来时，进度会一直停在 0%。网络慢就提示，文件下载失败或启动报错就说明原因并给出重试按钮 */
+(function () {
+  var t0 = Date.now(), failed = false;
+  var retry = ' <button type="button" onclick="location.reload()">重新加载</button>';
+  function say(html) { var m = document.getElementById('loader-msg'); if (m) m.innerHTML = html; }
+  addEventListener('error', function (e) {
+    if (window.BIO_BOOTED) return;
+    var t = e.target;
+    if (t && t.tagName === 'SCRIPT') {
+      failed = true;
+      // 外网隧道偶尔会断开几秒：自动等 4 秒重试，最多 3 次
+      var n = 0; try { n = +sessionStorage.getItem('bioRetry') || 0; } catch (x) {}
+      if (n < 3) {
+        try { sessionStorage.setItem('bioRetry', n + 1); } catch (x) {}
+        say('网络连接中断了一下，4 秒后自动重试（第 ' + (n + 1) + ' 次）…');
+        setTimeout(function () { location.reload(); }, 4000);
+      } else say('有文件没有下载成功，可能是网络不稳定。' + retry);
+    }
+    else if (e.message) { failed = true; say('页面启动出错：' + String(e.message).slice(0, 120) + retry); }
+  }, true);
+  var timer = setInterval(function () {
+    if (window.BIO_BOOTED) { clearInterval(timer); say(''); try { sessionStorage.removeItem('bioRetry'); } catch (x) {} return; }
+    var s = Math.round((Date.now() - t0) / 1000);
+    if (s >= 6 && !failed) say('网络较慢，正在下载（已等待 ' + s + ' 秒）…' + (s >= 20 ? retry : ''));
+  }, 1000);
+})();
+</script>
+</head>
+<body data-view="home">
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- 开场 -->
+<div id="loader">
+  <div class="loader-ring"><span></span><span></span><span></span></div>
+  <div class="loader-text">
+    <div class="loader-title">万 物</div>
+    <div class="loader-sub">正在唤醒 38 亿年的生命记忆 <b id="loader-pct">0</b>%</div>
+    <div class="loader-msg" id="loader-msg"></div>
+  </div>
+</div>
+
+<!-- 导航 -->
+<header class="nav">
+  <a class="brand" href="#/home" aria-label="返回首页">
+    <svg viewBox="0 0 40 40" class="brand-mark"><circle cx="20" cy="20" r="17"/><path d="M7 21c6-9 20-9 26 0M10 13c4 4 16 4 20 0M12 29c4-4 12-4 16 0"/></svg>
+    <span class="brand-name">万物<em>BIOSPHERE</em></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#/map" data-link="map"><i>01</i>地球</a>
+    <a href="#/time" data-link="time"><i>02</i>时间</a>
+    <a href="#/tree" data-link="tree"><i>03</i>生命树</a>
+    <a href="#/ocean" data-link="ocean"><i>04</i>深海</a>
+    <a href="#/scale" data-link="scale"><i>05</i>尺度</a>
+    <a href="#/redlist" data-link="redlist"><i>06</i>红色名录</a>
+    <a href="#/all" data-link="all"><i>07</i>万物</a>
+  </nav>
+  <button class="nav-search" id="open-palette" type="button">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span>搜索生物</span><kbd>⌘K</kbd>
+  </button>
+  <button class="nav-qr" id="open-qr" type="button" title="扫码在手机上打开" aria-label="扫码在手机上打开">
+    <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2zM16 16h2v2h-2z"/></svg><span>扫码访问</span>
+  </button>
+</header>
+
+<main>
+  <!-- 首页 -->
+  <section class="view" id="view-home" data-view="home">
+    <div class="home-scroll">
+      <div class="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-fallback" aria-hidden="true">万物</div>
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span>地球生命全景图鉴 · BIOSPHERE ATLAS</div>
+          <h1 class="sr-only">万物</h1>
+          <div class="hero-word"><span id="hero-idx">01 / 17</span><b id="hero-sub">约 870 万个物种，共享同一颗星球</b></div>
+          <div class="hero-dots" id="hero-dots"></div>
+          <p class="hero-lead">点击任意处引爆粒子 · 移动鼠标扰动星尘</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#/map">开始探索<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-ghost" href="#portals">七种视角</a>
+          </div>
+        </div>
+        <div class="scroll-hint"><span></span>向下滚动</div>
+      </div>
+
+      <div class="stats" data-reveal>
+        <div class="stat"><b data-count="8700000" data-fmt="wan">0</b><span>地球上估计存在的物种数</span></div>
+        <div class="stat"><b data-count="2160000" data-fmt="wan">0</b><span>人类已命名描述的物种</span></div>
+        <div class="stat"><b data-count="99" data-suffix="%">0</b><span>曾经存在过的物种已经灭绝</span></div>
+        <div class="stat"><b data-count="38" data-suffix=" 亿年">0</b><span>地球生命已延续的时间</span></div>
+      </div>
+
+      <div class="orb-sec">
+        <h2 class="section-title" data-reveal data-scramble><small>A PLANET OF SPECIES</small><span data-scr>物种星球</span></h2>
+        <p class="section-sub" data-reveal>每一颗光点都是一张来自原始来源的实拍照片。拖动旋转，点击查看。</p>
+        <div class="orb-stage" data-reveal><div class="orb-core"></div></div>
+        <div class="orb-cap"></div>
+      </div>
+
+      <div class="portals" id="portals">
+        <h2 class="section-title" data-reveal data-scramble><small>SEVEN LENSES</small><span data-scr>七种观看生命的方式</span></h2>
+        <p class="section-sub" data-reveal>同一个生物圈，七个入口——在哪里、在何时、从何而来、藏得多深、有多大、还剩多少，以及全部。</p>
+        <div class="lens-grid">
+          <a data-reveal class="lens lens-globe" data-art="globe" href="#/map" style="--c1:#3cf0c8;--c2:#3c9cf0">
+            <canvas class="lens-art"></canvas><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 01</span><span class="lens-stat"><b data-lstat="pins">679</b> 个物种定位在地图上</span></div>
+            <div class="lens-body">
+              <small>空间 · WHERE</small>
+              <h3>地球</h3>
+              <p>可旋转的三维地球，从大熊猫的竹林到南极冰架，点亮每一个物种的家园，追踪北极燕鸥、座头鲸与帝王蝶跨越半个地球的迁徙。</p>
+              <span class="lens-go"><kbd>1</kbd>进入地球<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+          <a data-reveal class="lens lens-time lens-side" data-art="time" href="#/time" style="--c1:#ffb547;--c2:#ff4d6d">
+            <canvas class="lens-art"></canvas><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 02</span><span class="lens-stat"><b>5</b> 次大灭绝</span></div>
+            <div class="lens-body">
+              <small>灭绝 · WHEN</small>
+              <h3>时间</h3>
+              <p>穿越 46 亿年，见证五次大灭绝与那些已经消失的生命——从奇虾到渡渡鸟，再到白鳍豚。</p>
+              <span class="lens-go"><kbd>2</kbd>进入时间<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+          <a data-reveal class="lens lens-tree" data-art="tree" href="#/tree" style="--c1:#b78bff;--c2:#6dffb0">
+            <canvas class="lens-art"></canvas><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 03</span><span class="lens-stat"><b>1</b> 个共同祖先</span></div>
+            <div class="lens-body">
+              <small>演化 · HOW</small>
+              <h3>生命树</h3>
+              <p>所有生命都源自同一个祖先。沿着枝杈追溯，你会发现你与蘑菇的亲缘比与植物更近。</p>
+              <span class="lens-go"><kbd>3</kbd>进入生命树<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+          <a data-reveal class="lens lens-ocean" data-art="ocean" href="#/ocean" style="--c1:#4fb8ff;--c2:#2d5bff">
+            <canvas class="lens-art"></canvas><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 04</span><span class="lens-stat"><b>10,935</b> 米</span></div>
+            <div class="lens-body">
+              <small>深度 · DEEP</small>
+              <h3>深海</h3>
+              <p>从阳光海面一路下潜到挑战者深渊，用手电筒照亮黑暗中发光的居民。</p>
+              <span class="lens-go"><kbd>4</kbd>开始下潜<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+          <a data-reveal class="lens lens-scale" data-art="scale" href="#/scale" style="--c1:#ff5fa2;--c2:#ffd166">
+            <canvas class="lens-art"></canvas><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 05</span><span class="lens-stat"><b data-lstat="decades">14</b> 个数量级</span></div>
+            <div class="lens-body">
+              <small>大小 · SIZE</small>
+              <h3>尺度</h3>
+              <p>从 17 纳米的病毒放大到 2,300 公里的大堡礁，在数量级之间无缝缩放生命的尺寸。</p>
+              <span class="lens-go"><kbd>5</kbd>进入尺度<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+          <a data-reveal class="lens lens-red" data-art="redlist" href="#/redlist" style="--c1:#ff4d6d;--c2:#ffb547">
+            <canvas class="lens-art"></canvas><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 06</span><span class="lens-stat"><b>9</b> 个 IUCN 等级</span></div>
+            <div class="lens-body">
+              <small>保护 · STATUS</small>
+              <h3>红色名录</h3>
+              <p>谁正处于危险之中、威胁从何而来，以及朱鹮、大熊猫们是怎样被救回来的。</p>
+              <span class="lens-go"><kbd>6</kbd>进入红色名录<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+          <a data-reveal class="lens lens-all lens-side" data-art="mosaic" href="#/all" style="--c1:#6dffb0;--c2:#5ef2ff">
+            <div class="lens-art lens-mosaic"></div><div class="lens-shade"></div>
+            <div class="lens-top"><span class="lens-num">LENS 07</span><span class="lens-stat lens-live-dot"><b>216 万+</b> 个已命名物种 · 实时</span></div>
+            <div class="lens-body">
+              <small>全部 · EVERYTHING</small>
+              <h3>万物名录</h3>
+              <p>接入 iNaturalist 全球分类库，从“生命”出发逐级下钻，人类已命名的任何一种生物都能在这里找到。</p>
+              <div class="lens-kings"><i style="--k:#ff5fa2">动物</i><i style="--k:#3dff9a">植物</i><i style="--k:#e8c26a">真菌</i><i style="--k:#c58bff">色藻</i><i style="--k:#a17bff">原生</i><i style="--k:#5ef2ff">细菌</i><i style="--k:#ffb547">古菌</i><i style="--k:#ff4d6d">病毒</i></div>
+              <span class="lens-go"><kbd>7</kbd>进入万物名录<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="clock-sec">
+        <h2 class="section-title" data-reveal data-scramble><small>EARTH IN 24 HOURS</small><span data-scr>如果地球历史只有一天</span></h2>
+        <p class="section-sub" data-reveal>把 45.4 亿年压缩成 24 小时：生命在凌晨出现，恐龙在 23:39 退场，而人类只存在于午夜前的最后几秒。</p>
+        <div class="clk" data-reveal>
+          <div class="clk-face"><svg id="life-clock" viewBox="-345 -345 690 690"></svg></div>
+          <div class="clk-card" id="clock-info">
+            <div class="clk-kick"><span class="clk-era"></span><span class="clk-ago"></span></div>
+            <div class="ci-time">00:00:00</div>
+            <div class="clk-prog"><i></i></div>
+            <div class="clk-pct">这一天已经过去 <b>0%</b></div>
+            <div class="ci-title">地球形成</div>
+            <div class="ci-desc">将鼠标移到表盘的事件上。</div>
+            <div class="clk-nav"><button type="button" data-d="-1" aria-label="上一个事件">‹</button><button type="button" class="clk-play" data-play>暂停</button><button type="button" data-d="1" aria-label="下一个事件">›</button></div>
+          </div>
+        </div>
+        <div class="clk-zoom" data-reveal>
+          <div class="clk-zoom-h"><b>放大最后时刻</b><span>复杂生命的全部历史，都挤在这一天的最后几个小时里</span></div>
+          <div class="clk-strips"></div>
+        </div>
+      </div>
+
+      <footer class="foot">
+        <p>万物 · BIOSPHERE ATLAS —— 一个纯前端的地球生命图鉴。数据综合自 IUCN 红色名录、古生物学文献与公开科普资料，数字为近似值，仅供科普参考。</p>
+        <p>快捷键：<kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索 · <kbd>1</kbd>–<kbd>7</kbd> 切换视角 · <kbd>Esc</kbd> 关闭</p>
+      </footer>
+    </div>
+  </section>
+
+  <section class="view" id="view-map" data-view="map"></section>
+  <section class="view" id="view-time" data-view="time"></section>
+  <section class="view" id="view-tree" data-view="tree"></section>
+  <section class="view" id="view-ocean" data-view="ocean"></section>
+  <section class="view" id="view-scale" data-view="scale"></section>
+  <section class="view" id="view-redlist" data-view="redlist"></section>
+  <section class="view" id="view-all" data-view="all"></section>
+</main>
+
+<!-- 物种详情 -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <article class="modal-card" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <button class="modal-close" data-close aria-label="关闭">✕</button>
+    <div class="m-visual">
+      <div class="m-glyph" id="m-glyph"></div>
+      <img id="m-img" alt="">
+      <div class="m-credit" id="m-credit"></div>
+    </div>
+    <div class="m-body">
+      <div class="m-tags" id="m-tags"></div>
+      <h2 id="m-title"></h2>
+      <div class="m-latin" id="m-latin"></div>
+      <div class="m-stats" id="m-stats"></div>
+      <p class="m-desc" id="m-desc"></p>
+      <div class="m-fact" id="m-fact"><b>你知道吗？</b><span></span></div>
+      <div class="m-actions" id="m-actions"></div>
+    </div>
+  </article>
+</div>
+
+<!-- 搜索面板 -->
+<div class="palette" id="palette" aria-hidden="true">
+  <div class="palette-backdrop" data-close></div>
+  <div class="palette-box">
+    <div class="palette-input">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="palette-q" type="text" placeholder="搜索物种、类群、地质年代…（中文 / 英文 / 学名）" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <ul class="palette-list" id="palette-list"></ul>
+  </div>
+</div>
+
+<!-- 扫码访问 -->
+<div class="qr" id="qr" aria-hidden="true">
+  <div class="qr-backdrop" data-close></div>
+  <div class="qr-box glass" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+    <button class="modal-close" data-close aria-label="关闭">✕</button>
+    <small class="qr-k">SCAN TO OPEN</small>
+    <h2 id="qr-title">扫码在手机上打开</h2>
+    <div class="qr-code" id="qr-code"></div>
+    <p class="qr-note" id="qr-note"></p>
+    <input id="qr-url" class="qr-url" type="url" spellcheck="false" autocomplete="off" aria-label="二维码中的网址">
+    <label class="qr-opt"><input type="checkbox" id="qr-view" checked> 扫码后直接打开当前视角</label>
+    <div class="qr-acts"><button type="button" data-copy>复制链接</button><button type="button" data-dl>下载二维码图片</button></div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="flash" id="flash"></div>
+
+<script src="vendor/d3.min.js?v=20261024101835"></script>
+<script src="vendor/topojson-client.min.js?v=20261024101835"></script>
+<script src="vendor/three.min.js?v=20261024101835"></script>
+<script src="vendor/world-110m.js?v=20261024101835"></script>
+<script src="vendor/qrcode.min.js?v=20261024101835"></script>
+<script src="js/data/species.js?v=20261024101835"></script>
+<script src="js/data/species2.js?v=20261024101835"></script>
+<script src="js/data/species3.js?v=20261024101835"></script>
+<script src="js/data/extinct.js?v=20261024101835"></script>
+<script src="js/data/tree.js?v=20261024101835"></script>
+<script src="js/data/treeSpecies.js?v=20261024101835"></script>
+<script src="js/data/ocean.js?v=20261024101835"></script>
+<script src="js/data/scale.js?v=20261024101835"></script>
+<script src="js/data/redlist.js?v=20261024101835"></script>
+<script src="js/data/sizes.js?v=20261024101835"></script>
+<script src="js/app.js?v=20261024101835"></script>
+<script src="js/photos.js?v=20261024101835"></script>
+<script src="js/live.js?v=20261024101835"></script>
+<script src="js/share.js?v=20261024101835"></script>
+<script src="js/fx.js?v=20261024101835"></script>
+<script src="js/hero3d.js?v=20261024101835"></script>
+<script src="js/views/home.js?v=20261024101835"></script>
+<script src="js/views/lenses.js?v=20261024101835"></script>
+<script src="js/views/map.js?v=20261024101835"></script>
+<script src="js/views/timeline.js?v=20261024101835"></script>
+<script src="js/views/tree.js?v=20261024101835"></script>
+<script src="js/views/ocean.js?v=20261024101835"></script>
+<script src="js/views/scale.js?v=20261024101835"></script>
+<script src="js/views/redlist.js?v=20261024101835"></script>
+<script src="js/views/all.js?v=20261024101835"></script>
+<script src="js/main.js?v=20261024101835"></script>
+</body>
+</html>
